@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Will You Be My Valentine?</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .heart {
+            font-size: 100px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 10px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            background: white;
+            color: #ff1493;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .date-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .date-button {
+            padding: 15px;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .date-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+        }
+        .date-button.selected {
+            background: white;
+            color: #ff1493;
+        }
+        .place-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .place-card:hover {
+            transform: scale(1.02);
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Initial Proposal -->
+        <div id="proposal">
+            <div class="heart">❤️</div>
+            <h1>Will You Be My Valentine?</h1>
+            <button onclick="showDatePicker()">Yes!</button>
+        </div>
+
+        <!-- Date Picker -->
+        <div id="datePicker" class="hidden">
+            <h2>When would you like to celebrate?</h2>
+            <div class="date-buttons">
+                <button class="date-button" onclick="selectDate('February 1st')">February 1st</button>
+                <button class="date-button" onclick="selectDate('February 2nd')">February 2nd</button>
+                <button class="date-button" onclick="selectDate('February 3rd')">February 3rd</button>
+            </div>
+            <button id="nextButton" onclick="showPlaces()" disabled>Next</button>
+        </div>
+
+        <!-- Places Selection -->
+        <div id="places" class="hidden">
+            <h2>Choose where you'd like to go</h2>
+            <div id="placesList"></div>
+        </div>
+
+        <!-- Final Message -->
+        <div id="final" class="hidden">
+            <h2>Perfect! Can't wait! ❤️</h2>
+            <div class="heart">💝</div>
+        </div>
+    </div>
+
+    <script>
+        // Replace this with your Discord webhook URL
+        const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/997582723541635172/HvE49-FowTVsqPOy39FgbK3a-cfZLqIU7CJt5UGekmZB5LBkBlTHdTh5ZcpyHwj2wQhC';
+        
+        const places = [
+            {
+                title: "Museum of your choice",
+                description: "Had plans, but couldnt go to the place? its ur chance :)"
+            },
+            {
+                title: "Cookin Date",
+                description: "U can just say 'Let him cook'"
+            },
+            {
+                title: "Movie Night",
+                description: "Let's watch some movies in the cinema"
+            },
+            {
+                title: "Coffee & walk ",
+                description: "isnt it  nice to walk,is it?"
+            },
+            {
+                title: "Spa Day Retreat",
+                description: "Its gonna be duo massage therapy :D(no, the massagist is not my old friend)"
+            },
+            {
+                title: "DIY Spa at home",
+                description: "Soft music,and my soft hands massage your shoulders,because they're tired after holding all of your charisma and beauty during the day"
+            }
+        ];
+
+        let selectedDate = null;
+
+        function showDatePicker() {
+            document.getElementById('proposal').classList.add('hidden');
+            document.getElementById('datePicker').classList.remove('hidden');
+            sendToDiscord('💕 She said YES to being your Valentine! 💕');
+        }
+
+        function selectDate(date) {
+            selectedDate = date;
+            // Reset all buttons
+            document.querySelectorAll('.date-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            // Highlight selected button
+            event.target.classList.add('selected');
+            // Enable next button
+            document.getElementById('nextButton').disabled = false;
+        }
+
+        function showPlaces() {
+            document.getElementById('datePicker').classList.add('hidden');
+            document.getElementById('places').classList.remove('hidden');
+            sendToDiscord(`📅 Selected Date: ${selectedDate}`);
+            
+            const placesList = document.getElementById('placesList');
+            placesList.innerHTML = ''; // Clear existing content
+            places.forEach((place, index) => {
+                const card = document.createElement('div');
+                card.className = 'place-card';
+                card.innerHTML = `
+                    <h3>${place.title}</h3>
+                    <p>${place.description}</p>
+                `;
+                card.onclick = () => selectPlace(index);
+                placesList.appendChild(card);
+            });
+        }
+
+        function selectPlace(index) {
+            document.getElementById('places').classList.add('hidden');
+            document.getElementById('final').classList.remove('hidden');
+            sendToDiscord(`🎉 Selected Place: ${places[index].title}\n📝 Description: ${places[index].description}\n📅 Date: ${selectedDate}`);
+        }
+
+        function sendToDiscord(message) {
+            fetch(DISCORD_WEBHOOK, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    content: message
+                })
+            }).catch(console.error);
+        }
+    </script>
+</body>
+</html>
